@@ -8,9 +8,10 @@ diff --git a/lib/CMakeLists.txt b/lib/CMakeLists.txt
 index d3d5f38..4820f2c 100644
 --- a/lib/CMakeLists.txt
 +++ b/lib/CMakeLists.txt
-@@ -2,7 +2,7 @@ set(LIBCXX_LIB_CMAKEFILES_DIR "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTOR
+@@ -2,8 +2,8 @@ set(LIBCXX_LIB_CMAKEFILES_DIR "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTOR
  
  # Get sources
+ # FIXME: Don't use glob here
  file(GLOB LIBCXX_SOURCES ../src/*.cpp)
 -if(WIN32)
 +if(MSVC)
@@ -21,9 +22,11 @@ diff --git a/src/random.cpp b/src/random.cpp
 index 4ab424e..d3062f5 100644
 --- a/src/random.cpp
 +++ b/src/random.cpp
-@@ -7,7 +7,7 @@
+@@ -7,9 +7,9 @@
  //
  //===----------------------------------------------------------------------===//
+ 
+ #include <__config>
  
 -#if defined(_LIBCPP_USING_WIN32_RANDOM)
 +#if defined(_LIBCPP_USING_WIN32_RANDOM) || defined(__MINGW32__)

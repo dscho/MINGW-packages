@@ -22,7 +22,7 @@ pkgname=("${MINGW_PACKAGE_PREFIX}-${_realname}-svn"
          "${MINGW_PACKAGE_PREFIX}-llvm-svn"
          #"${MINGW_PACKAGE_PREFIX}-lldb-svn"
         )
-pkgver=60430.db7c3ac
+pkgver=69490.007c5824a9
 pkgrel=1
 pkgdesc="C language family frontend for LLVM (svn) (mingw-w64)"
 arch=('any')
@@ -36,19 +36,18 @@ makedepends=("${MINGW_PACKAGE_PREFIX}-cmake"
              "git")
 depends=("${MINGW_PACKAGE_PREFIX}-gcc")
 options=('debug' '!strip')
-source=("llvm"::"git+https://llvm.org/git/llvm.git"
-        "lld"::"git+https://llvm.org/git/lld.git"
-        "clang"::"git+https://llvm.org/git/clang.git"
-        "clang-tools-extra"::"git+https://llvm.org/git/clang-tools-extra.git"
-        "compiler-rt"::"git+https://llvm.org/git/compiler-rt.git"
-        "testsuite"::"git+https://llvm.org/git/test-suite.git"
-        "libcxxabi"::"git+https://llvm.org/git/libcxxabi.git"
-        "libcxx"::"git+https://llvm.org/git/libcxx.git"
-        "lldb"::"git+https://llvm.org/git/lldb.git"
+source=("llvm"::"git+https://git.llvm.org/git/llvm.git"
+        "lld"::"git+https://git.llvm.org/git/lld.git"
+        "clang"::"git+https://git.llvm.org/git/clang.git"
+        "clang-tools-extra"::"git+https://git.llvm.org/git/clang-tools-extra.git"
+        "compiler-rt"::"git+https://git.llvm.org/git/compiler-rt.git"
+        "testsuite"::"git+https://git.llvm.org/git/test-suite.git"
+        "libcxxabi"::"git+https://git.llvm.org/git/libcxxabi.git"
+        "libcxx"::"git+https://git.llvm.org/git/libcxx.git"
+        "lldb"::"git+https://git.llvm.org/git/lldb.git"
         0001-Fix-GetHostTriple-for-mingw-w64-in-msys.patch
         0002-use-DESTDIR-on-windows.patch
         0003-generate-proper-library-names-mingw.patch
-        0014-dont-create-cl-mingw.patch
         0018-mingw-enable-static-libclang.patch
         0041-libcxx-add-support-for-mingw-w64.patch)
 
@@ -72,9 +71,8 @@ sha256sums=('SKIP'
             '0804146b32138d55c611336cc81e1783c29a8fab0fe62f248ba1ad7acc711c4d'
             '2671d9644b135dc81daa9d28290799ef51d3e14ebfc5791eb2102e8ede894b89'
             'c50bb58575072cf05986adfff737c27477b145cb4e9e2edb625ec34efe9ad23f'
-            'b03cfc7ebbbfb847e88ae3569d9dcafb01f179b06f1312de29fbd5b7cf906617'
             'd929ef7c4c18c65f7a48156ff3ca38453334822008f2a5f57dd3f1d7c61b6723'
-            '5b8edbbb638c906216e20229529e8348abc50d5886d20e07af08543e1e574e94')
+            '2642c70550503311c8c99ec0da67c258ad782520f74457effb25859f40dbbf81')
 
 pkgver_internal() {
   if [ ! -d "$1" ]; then
@@ -87,33 +85,32 @@ pkgver_internal() {
 }
 
 pkgver() {
-  pkgver_internal "${srcdir}"/clang
+  pkgver_internal "${srcdir}"/llvm/tools/clang
 }
 
 prepare() {
   cd "${srcdir}"/llvm
-  git am "${srcdir}"/0001-Fix-GetHostTriple-for-mingw-w64-in-msys.patch
-  git am "${srcdir}"/0002-use-DESTDIR-on-windows.patch
-  git am "${srcdir}"/0003-generate-proper-library-names-mingw.patch
+  git am -3 "${srcdir}"/0001-Fix-GetHostTriple-for-mingw-w64-in-msys.patch
+  git am -3 "${srcdir}"/0002-use-DESTDIR-on-windows.patch
+  git am -3 "${srcdir}"/0003-generate-proper-library-names-mingw.patch
 
   # Fix docs installation directory
-  sed -i 's:$(PROJ_prefix)/docs/llvm:$(PROJ_prefix)/share/doc/llvm:' \
-    Makefile.config.in
+  #sed -i 's:$(PROJ_prefix)/docs/llvm:$(PROJ_prefix)/share/doc/llvm:' \
+  #  Makefile.config.in
 
   # Fix definition of LLVM_CMAKE_DIR in LLVMConfig.cmake
-  sed -i '/@LLVM_CONFIG_CMAKE_DIR@/s:$(PROJ_cmake):$(PROJ_prefix)/share/llvm/cmake:' \
-    cmake/modules/Makefile
+  # sed -i '/@LLVM_CONFIG_CMAKE_DIR@/s:$(PROJ_cmake):$(PROJ_prefix)/share/llvm/cmake:' \
+  #  cmake/modules/Makefile
 
   cd "${srcdir}"/compiler-rt
 
   cd "${srcdir}"/lld
 
   cd "${srcdir}"/libcxx
-  git am "${srcdir}"/0041-libcxx-add-support-for-mingw-w64.patch
+  git am -3 "${srcdir}"/0041-libcxx-add-support-for-mingw-w64.patch
 
   cd "${srcdir}"/clang
-  git am "${srcdir}"/0014-dont-create-cl-mingw.patch
-  git am "${srcdir}"/0018-mingw-enable-static-libclang.patch
+  git am -3 "${srcdir}"/0018-mingw-enable-static-libclang.patch
 
   cd "${srcdir}"/llvm
 
