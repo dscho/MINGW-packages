@@ -557,6 +557,10 @@ int main(void)
 		prefix_args_len = wcslen(buffer);
 	}
 	else if (!wcsnicmp(basename, L"git-", 4)) {
+		LPCWSTR builtin_env = L"GIT_WRAPPER_BUILTIN_NAME";
+		LPWSTR p;
+		int len;
+
 		needs_env_setup = 0;
 
 		/* Call a builtin */
@@ -564,6 +568,26 @@ int main(void)
 		prefix_args_len = wcslen(prefix_args);
 		if (!wcsicmp(prefix_args + prefix_args_len - 4, L".exe"))
 			prefix_args_len -= 4;
+
+		len = GetEnvironmentVariableW(builtin_env, NULL, 0);
+		if (len == prefix_args_len + 1) {
+			p = malloc(sizeof(WCHAR) * len);
+			if (!p ||
+			    !GetEnvironmentVariableW(builtin_env, p, len) ||
+			    !wcsnicmp(p, prefix_args, prefix_args_len)) {
+				fwprintf(stderr,
+					 L"Invalid builtin name (incorrect "
+					 "case?): '%.*s'\n",
+					prefix_args_len, prefix_args);
+				exit(1);
+			}
+			free(p);
+		}
+		p = malloc(sizeof(WCHAR) * (prefix_args_len + 1));
+		memcpy(p, prefix_args, sizeof(WCHAR) * prefix_args_len);
+		p[prefix_args_len] = L'\0';
+		SetEnvironmentVariableW(builtin_env, p);
+		free(p);
 
 		/* set the default exe module */
 		wcscpy(exe, exepath);
