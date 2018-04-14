@@ -40,6 +40,13 @@ source=("https://nodejs.org/dist/v${pkgver}/node-v${pkgver}.tar.xz"
         '0013-Revert-to-FHS-installation-paths-on-Windows-tests-no.patch'
 	'0014-Fix-linking-of-cctest-in-mingw-w64.patch'
 	'0015-cctest-allow-building-with-municode.patch'
+	'0016-format-macros.h-do-not-rely-on-__STDC_FORMAT_MACROS.patch'
+	'0017-Do-not-get-confused-by-the-presence-of-winpthread.patch'
+	'0018-Add-missing-include-to-build-condition-variable.cc-s.patch'
+	'0019-Do-not-let-nghttp2-pretend-that-ssize_t-is-int.patch'
+	'0020-inspector-use-namespaced-icu-symbols.patch'
+	'0021-Use-wide-character-Win32-API-functions-to-handle-wch.patch'
+	'0022-Disable-MSVC_HACK.patch'
         'node')
 
 prepare() {
@@ -60,6 +67,13 @@ prepare() {
   patch -Np1 -i "${srcdir}/0013-Revert-to-FHS-installation-paths-on-Windows-tests-no.patch"
   patch -Np1 -i "${srcdir}/0014-Fix-linking-of-cctest-in-mingw-w64.patch"
   patch -Np1 -i "${srcdir}/0015-cctest-allow-building-with-municode.patch"
+  patch -Np1 -i "${srcdir}/0016-format-macros.h-do-not-rely-on-__STDC_FORMAT_MACROS.patch"
+  patch -Np1 -i "${srcdir}/0017-Do-not-get-confused-by-the-presence-of-winpthread.patch"
+  patch -Np1 -i "${srcdir}/0018-Add-missing-include-to-build-condition-variable.cc-s.patch"
+  patch -Np1 -i "${srcdir}/0019-Do-not-let-nghttp2-pretend-that-ssize_t-is-int.patch"
+  patch -Np1 -i "${srcdir}/0020-inspector-use-namespaced-icu-symbols.patch"
+  patch -Np1 -i "${srcdir}/0021-Use-wide-character-Win32-API-functions-to-handle-wch.patch"
+  patch -Np1 -i "${srcdir}/0022-Disable-MSVC_HACK.patch"
 }
 
 build() {
@@ -97,7 +111,11 @@ build() {
 
   ${MINGW_PREFIX}/bin/python2 tools/gyp_node.py -f make
   touch config.gypi
-  make
+  # Work around the problem where the protocol files would be generated into a
+  # subdirectory relative to deps/v8/src/inspector instead of relative to the
+  # top-level directory.
+  CXXFLAGS=-D_WIN32_WINNT=0x0600 make out/Release/obj/gen/src/inspector/protocol/Forward.h
+  CXXFLAGS=-D_WIN32_WINNT=0x0600 make
 
   # flatten the nested node_modules/ hierarchy
   test -z "$(find deps/npm/node_modules | grep '^.\{140,\}$')" ||
@@ -133,19 +151,26 @@ package() {
 }
 
 sha256sums=('115eda89ff718abe811cb14c31dec891efa20b92c99e715f5e094641bc56bec3'
-            '26a5e2b2d4818e0a7ba7f93625e5f6cd802e75519478553568f5cbeda34edf98'
-            'aa087d5cf94a34398768edf4cc5531680f8e9da72772c014e5d09ce8f8a2f582'
-            '1ef1558b7695ae4d77245469f026285abee3dbdb995867b53cb478c5a0de17a5'
-            'e3b20d73b6c539da62fd04f73f3913afc67fcd06e811cf067a9f96017327f8f4'
-            'ff33fb2734a96d05424c893bd5de0fa2e18ab856250ac6cd5a77638d12f7a38b'
-            '06428e1d6958ffbb15d19941f86abcb9b4ccca1ed9d52c1c56db56d5c5b67bae'
-            '8503f6f4c4b30d5c7f3355ad57e205b3e0a6f400affb4476dedc00c5b8dea484'
-            '617c7cc5cd79214405c4c5027fe5a1df9fea9194eca5347ad98fb5f6df18c700'
-            '44242e72b4b16b6137c4a7846de4804ed71536e1f2ef5ad5a92ac4db2610a23e'
-            '3bf91f60d59fdee84f83dcaa72b12a2d37b9b02f1ce4a11fa56030c55ca57459'
-            'd22d93f7455636ead95d7566dc0ae314fa513ffdd74560d42ba4dee664605531'
-            '79749833135ba60b370bc0adabc92647b2fa39d6c50fb72238c93d6de6cc2f11'
-            '631f46c403e84d5d3602ec05d3d6155f99b52b89b1d00e4f973070ea3ba3ab48'
-            'a9a4dcbede2ced7a4238ea5950459e4df712c73302248284928beebf16d0cf54'
-            '5d9c17a584454fb5eb572b948c115aff64fde3babadf0deafac9aa40ee6e12cd'
+            '9e441c328e353fff31d68cf9cd6ec3df435d855bce569f7cbb5e7416f35abf12'
+            'a2c02dc437ed61fcefb43a933aee5688a06216f7f361800a138ef5939271aaa3'
+            '4c4630d0187ba46923978874a0c62b82ee5aab295140ed1c55120c96ee78ee8d'
+            '1dbe82e1d339ec3676cd09ae2cda9ab008e883b9d244c4cc5a606e4f005f254c'
+            '323499d4f2a2696b852dece082c3813c09d3b68297e5dcb204ed7dcee95e6a3a'
+            '3433fb822b9035c08dffbd3257b46ea8ac94e2208659d64b89db641b834a5c18'
+            '47d60824d60449e9ceb96bb1246d359f4aabd7c16489adcd986809221072aec0'
+            'a0c1adfa8a8348e4c2e9802a83e29b6583a8bcc49b910061722866ec9d0770c7'
+            '04475ac58e9c91896e39307e75e5916128785d50b2c2cbd8471298b1cecb12df'
+            '3b067184e59330db0021634b515bcd6ae3688726e75c199728143e93cb775613'
+            'e014351a1af8bf1914727f39eff68c51494f5b4cbe86fc49c0695f57f5b86880'
+            '2e1de5d575794c280fe89b7798d6cbd3fe63bf44e3422bfb21db6737226ffff4'
+            'c9ca0c275b7004121afcca81057781a3b3aaacbdd744b935783ecf65c5c400d1'
+            '0e8254261c4bc525e735a0b74d4940b0f9a76b6e9dd559bb9cae8c4f95f71497'
+            '5de50596f0bc2d6030a8513b9c1df5ee088d9b19afe3ed9f88a3fec63380d725'
+            '6004d0da93fb0c1c2eb65e6d1c04b2f58731c49af5a44b2973ddd01ce7bc3916'
+            '94f1b78422a85d328b5d4c51d7c9872bffea47e576a47772385efbdc5a5a47e6'
+            '1fc84dfc20f5eb46731847831e65ff7d6451132851a17eb1d4897c8db36c46a9'
+            '06bc128e7f25d622788c48a686966ab69d13db9af2a2edbe9f612244b4a78487'
+            'e4f39631cfeeda8d4c3aaba9afade17073f134b3d019d16184ef75c1e62ee24e'
+            '67de55113287d6530572081234e247e065826bcfb3d982c8d9323945cc6290f8'
+            '8a18949f2d73ad0b688de11ae998b68eaf83491077bcdc5981c932ea8129e799'
             '284251ff443506cd61530a026afb421d0084e4ad25c037bcfe3a045246d729a2')
