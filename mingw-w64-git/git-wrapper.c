@@ -420,12 +420,12 @@ static int configure_via_resource(LPWSTR basename, LPWSTR exepath, LPWSTR exep,
 	LPWSTR *prefix_args, int *prefix_args_len,
 	int *is_git_command, LPWSTR *working_directory, int *full_path,
 	int *skip_arguments, int *allocate_console, int *show_console,
-	int *append_quote_to_cmdline)
+	int *append_quote_to_cmdline, LPWSTR *window_title)
 {
 	int i, id, minimal_search_path, needs_a_console, no_hide, wargc;
 	int append_quote;
 	LPWSTR *wargv;
-	WCHAR *app_id;
+	WCHAR *app_id = NULL, *title = NULL;
 
 #define BUFSIZE 65536
 	static WCHAR buf[BUFSIZE];
@@ -437,7 +437,10 @@ static int configure_via_resource(LPWSTR basename, LPWSTR exepath, LPWSTR exep,
 		needs_a_console = 0;
 		no_hide = -1;
 		append_quote = 0;
+		free(app_id);
 		app_id = NULL;
+		free(title);
+		title = NULL;
 		len = LoadString(NULL, id, buf, BUFSIZE);
 
 		if (!len) {
@@ -467,16 +470,25 @@ static int configure_via_resource(LPWSTR basename, LPWSTR exepath, LPWSTR exep,
 			else if (strip_prefix(buf, &len, L"APP_ID=")) {
 				LPWSTR space = wcschr(buf, L' ');
 				size_t app_id_len = space - buf;
-				if (!space) {
-					len -= 7;
-					memmove(buf, buf + 7,
-							len * sizeof(WCHAR));
+				if (!space)
 					break;
-				}
 				app_id = wcsdup(buf);
 				app_id[app_id_len] = L'\0';
 				len -= app_id_len + 1;
 				memmove(buf, buf + app_id_len + 1,
+						len * sizeof(WCHAR));
+			}
+			else if (strip_prefix(buf, &len, L"WINDOW_TITLE=\"")) {
+				LPWSTR quote = wcschr(buf, L'"');
+				size_t title_len = quote - buf;
+				if (!quote)
+					break;
+				title = wcsdup(buf);
+				title[title_len] = L'\0';
+				while (buf[title_len + 1] == L' ')
+					title_len++;
+				len -= title_len + 1;
+				memmove(buf, buf + title_len + 1,
 						len * sizeof(WCHAR));
 			}
 			else
@@ -548,6 +560,10 @@ static int configure_via_resource(LPWSTR basename, LPWSTR exepath, LPWSTR exep,
 			free(app_id);
 			app_id = wcsdup(wargv[i] + 9);
 		}
+		else if (!wcsncmp(L"--title=", wargv[i], 8)) {
+			free(title);
+			title = wcsdup(wargv[i] + 8);
+		}
 		else
 			break;
 		*skip_arguments = i;
@@ -562,6 +578,8 @@ static int configure_via_resource(LPWSTR basename, LPWSTR exepath, LPWSTR exep,
 		*append_quote_to_cmdline = append_quote == 1;
 	if (app_id)
 		set_app_id(app_id);
+	if (title)
+		*window_title = title;
 	LocalFree(wargv);
 
 	return 1;
@@ -615,7 +633,7 @@ int main(void)
 		append_quote_to_cmdline = 0;
 	WCHAR exepath[MAX_PATH], exe[MAX_PATH], top_level_path[MAX_PATH];
 	LPWSTR cmd = NULL, exep = exe, prefix_args = NULL, basename;
-	LPWSTR working_directory = NULL;
+	LPWSTR working_directory = NULL, window_title = NULL;
 
 	/* Determine MSys2-based Git path. */
 	swprintf(msystem_bin, sizeof(msystem_bin),
@@ -634,7 +652,7 @@ int main(void)
 			&prefix_args, &prefix_args_len,
 			&is_git_command, &working_directory,
 			&full_path, &skip_arguments, &allocate_console,
-			&show_console, &append_quote_to_cmdline)) {
+			&show_console, &append_quote_to_cmdline, &window_title)) {
 		/* do nothing */
 	}
 	else if (!wcsicmp(basename, L"git-lfs.exe")) {
@@ -756,6 +774,7 @@ int main(void)
 			si.dwFlags |= STARTF_USESHOWWINDOW;
 			si.wShowWindow = show_console ? SW_SHOW : SW_HIDE;
 		}
+		si.lpTitle = window_title;
 
 		br = CreateProcess(/* module: null means use command line */
 				exep,
