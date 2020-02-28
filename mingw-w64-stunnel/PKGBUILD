@@ -1,0 +1,57 @@
+# Maintainer: Johannes Schindelin <johannes.schindelin@gmx.de>
+
+_realname=stunnel
+pkgbase=mingw-w64-${_realname}
+pkgname=("${MINGW_PACKAGE_PREFIX}-${_realname}")
+pkgver=5.56
+pkgrel=1
+pkgdesc="TLS proxy (mingw-w64)"
+arch=('any')
+url="https://www.stunnel.org/"
+depends=("${MINGW_PACKAGE_PREFIX}-openssl")
+license=('GPL2')
+
+source=("${url}downloads/${_realname}-${pkgver}.tar.gz"
+        ax_append_compile_flags.m4
+        ax_append_flag.m4
+        ax_append_link_flags.m4
+        ax_check_compile_flag.m4
+        ax_check_link_flag.m4
+        ax_pthread.m4
+        ax_require_defined.m4)
+sha256sums=('7384bfb356b9a89ddfee70b5ca494d187605bb516b4fff597e167f97e2236b22'
+            'ecbcac20f9872c57e7615d57874b3798b809288a48602b790b2977446e272323'
+            '392cb0e965351b1d6a9847cf165dc4092fb1853fd63dbe010ac8b21c286f5e16'
+            '087c9c6fc74fa72c3cb77a21de75b6488cd3f360ae4771056dacdf7b66cc0eca'
+            '629dc6835eb1e2bd586fd842a4db66541bc442bcc2b13d6f24907631c5a688b0'
+            'c335b90e218fdc064e67003706c9192ca779c83720c4b369254caad6c5a78be3'
+            '07683234bc076455749e88c83ffb9f186afd7246565340cb601060dd59f90766'
+            'd870b21e817747c6a61a9dd72e06ea45f87e012c7a1a9aa5ff90cd3af89b3774')
+
+prepare() {
+  cd ${srcdir}/${_realname}-${pkgver}
+
+  cp ../ax_*.m4 m4/
+  autoreconf -fiv
+}
+
+build() {
+  cd ${srcdir}/${_realname}-${pkgver}
+
+  ./configure --prefix=${MINGW_PREFIX}
+
+  make -C src win32_windres=windres \
+    mingw$(test /mingw64 = ${MINGW_PREFIX} && echo 64)
+  make -C doc stunnel.html
+}
+
+package() {
+  cd ${srcdir}/${_realname}-${pkgver}
+
+  install -d -m 755 "${pkgdir}${MINGW_PREFIX}/bin"
+  install -m 755 bin/win${MINGW_PREFIX#/mingw}/stunnel.exe "${pkgdir}${MINGW_PREFIX}/bin"
+  install -m 755 bin/win${MINGW_PREFIX#/mingw}/tstunnel.exe "${pkgdir}${MINGW_PREFIX}/bin"
+
+  install -d -m 755 "${pkgdir}${MINGW_PREFIX}/share/doc/stunnel"
+  install -m 644 doc/stunnel.html "${pkgdir}${MINGW_PREFIX}/share/doc/stunnel"
+}
