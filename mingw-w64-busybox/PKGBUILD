@@ -4,7 +4,6 @@ _realname=busybox
 pkgbase=mingw-w64-${_realname}
 pkgname=("${MINGW_PACKAGE_PREFIX}-${_realname}"
          "${MINGW_PACKAGE_PREFIX}-${_realname}-pdb")
-_ver_base=1.28.0pre
 pkgver=1.28.0pre.16550.0b3cdd76c
 pkgrel=1
 pkgdesc="Windows port of BusyBox (mingw-w64)"
@@ -19,6 +18,11 @@ sha256sums=('SKIP')
 
 pkgver() {
   cd ${srcdir}/${_realname}-w32
+  _ver_base="$(sed -n '/^VERSION = /{
+	N
+	N
+	s|^VERSION = \([0-9]*\)\nPATCHLEVEL = \([0-9]*\)\nSUBLEVEL = \([0-9]*\)$|\1.\2.\3pre|p
+  }' Makefile)"
   printf "%s.%s.%s" "$_ver_base" \
     "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
 }
