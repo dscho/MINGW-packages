@@ -60,7 +60,7 @@ build() {
   cv2pdb busybox_unstripped.exe busybox.exe busybox.pdb
 }
 
-package() {
+common_package() {
   cd ${srcdir}/${_realname}-w32
 
   test pdb != "$1" || {
@@ -83,17 +83,17 @@ package() {
 }
 
 package_mingw-w64-i686-busybox() {
-  package
+  common_package
 }
 
 package_mingw-w64-x86_64-busybox() {
-  package
+  common_package
 }
 
 package_mingw-w64-i686-busybox-pdb() {
-  package pdb
+  common_package pdb
 }
 
 package_mingw-w64-x86_64-busybox-pdb() {
-  package pdb
+  common_package pdb
 }
