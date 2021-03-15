@@ -30,7 +30,9 @@ pkgver() {
 prepare() {
   cd ${srcdir}/${_realname}-w32
 
+  make distclean
   rm -f .config
+  git reset --hard # restore empty `.h` files
 
   case "$CARCH" in
   i686)
@@ -54,7 +56,6 @@ build() {
   test "a$F" = "a$CPPFLAGS" ||
   CPPFLAGS="$F${CPPFLAGS##* -D__USE_MINGW_ANSI_STDIO=*}"
 
-  make clean
   make busybox_unstripped.exe
   cv2pdb busybox_unstripped.exe busybox.exe busybox.pdb
 }
