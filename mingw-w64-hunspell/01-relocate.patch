@@ -10,7 +10,7 @@ index 4c29f1a..cc25476 100644
 +hunspell_CXXFLAGS = \
 +  -DBINDIR=\""$(bindir)"\" \
 +  -DDATA_DIR=\""$(datadir)"\"
-+hunspell_SOURCES=hunspell.cxx pathtools.c pathtools.h
++hunspell_SOURCES=hunspell.cxx pathtools.cxx pathtools.h
  nodist_hunspell_SOURCES= ../../config.h
  hunspell_LDADD = @LIBINTL@ @LIBICONV@ ../parsers/libparsers.a \
  	../hunspell/libhunspell-1.7.la @CURSESLIB@ @READLINELIB@

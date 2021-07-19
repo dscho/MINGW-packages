@@ -46,7 +46,8 @@ prepare() {
   } || exit 1
 
   cd "${srcdir}/${_realname}-${pkgver}"
-  cp -fHv "${srcdir}"/pathtools.[ch] tools/
+  cp -fHv "${srcdir}"/pathtools.c src/tools/pathtools.cxx
+  cp -fHv "${srcdir}"/pathtools.h src/tools/
 
   cp -Rp README.md README
   patch -Np1 -i ${srcdir}/01-relocate.patch
