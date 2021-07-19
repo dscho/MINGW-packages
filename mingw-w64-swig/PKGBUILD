@@ -24,7 +24,7 @@ source=(https://downloads.sourceforge.net/${_realname}/${_realname}-${pkgver}.ta
 sha256sums=('d53be9730d8d58a16bf0cbd1f8ac0c0c3e1090573168bfa151b01eb47fa906fc'
             '6f1016e6647b6340fdceefaf24ff391f4c0ea3c785ddf70c9794ca2356797888'
             '6ce4dcf4ef6c4bce48dbcb6f1b5226baf79f74ac76719fb0c06419a0aadb37a3'
-            '2c3ec71848e63780180e9f0f2980a10cd6f79761aa075a1cf25d6985fbd9dcbc'
+            '7239de790c573d82bd7ef9aa46afd99c5b078f82dc5093f697e80693bdc026b3'
             '057f0a306aee0d28a5bb6538b569c650e47c05b9848c9477cdeb7bb8c792944d')
 
 prepare() {

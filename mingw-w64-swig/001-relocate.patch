@@ -24,11 +24,13 @@ diff -Naur swig-4.0.0.orig/Source/Makefile.am swig-4.0.0/Source/Makefile.am
 diff -Naur swig-4.0.0.orig/Source/Modules/main.cxx swig-4.0.0/Source/Modules/main.cxx
 --- swig-4.0.0.orig/Source/Modules/main.cxx	2019-05-01 18:29:03.606830700 -0400
 +++ swig-4.0.0/Source/Modules/main.cxx	2019-05-01 18:56:39.415856300 -0400
-@@ -25,6 +25,8 @@
+@@ -25,6 +25,10 @@
  #include <ctype.h>
  #include <limits.h>		// for INT_MAX
  
++extern "C" {
 +#include "pathtools.h"
++}
 +
  // Global variables
  
