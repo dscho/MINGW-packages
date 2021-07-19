@@ -73,7 +73,8 @@ prepare() {
   } || exit 1
 
   cd ${_realname}
-  cp -fHv "${srcdir}"/pathtools.[ch] src/common/
+  cp -fHv "${srcdir}"/pathtools.c src/common/pathtools.cpp
+  cp -fHv "${srcdir}"/pathtools.h src/common/
 
   git am --committer-date-is-author-date ${srcdir}/0001-Remove-hardcoded-march-to-allow-64-bit-builds.patch
   git am --committer-date-is-author-date ${srcdir}/0002-Always-use-Win32-threads-for-mingw.patch
