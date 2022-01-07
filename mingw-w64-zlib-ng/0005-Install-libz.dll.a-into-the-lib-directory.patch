@@ -1,0 +1,30 @@
+From fdf194bee6b1b53aef4b893235214f26a0832741 Mon Sep 17 00:00:00 2001
+From: Johannes Schindelin <johannes.schindelin@gmx.de>
+Date: Thu, 30 Jun 2022 15:35:23 +0200
+Subject: [PATCH 5/5] Install libz.dll.a into the `lib/` directory
+
+This is where MSYS2 wants to put it.
+
+Signed-off-by: Johannes Schindelin <johannes.schindelin@gmx.de>
+---
+ Makefile.in | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/Makefile.in b/Makefile.in
+index 9135a04..1069fc6 100644
+--- a/Makefile.in
++++ b/Makefile.in
+@@ -361,8 +361,8 @@ ifneq ($(SHAREDLIB),$(SHAREDTARGET))
+ # ldconfig is for Linux
+ endif
+ ifneq ($(IMPORTLIB),)
+-	cp $(IMPORTLIB) $(DESTDIR)$(sharedlibdir)
+-	chmod 644 $(DESTDIR)$(sharedlibdir)/$(IMPORTLIB)
++	cp $(IMPORTLIB) $(DESTDIR)$(libdir)
++	chmod 644 $(DESTDIR)$(libdir)/$(IMPORTLIB)
+ endif
+ endif
+ 
+-- 
+2.37.0.rc2.windows.1
+

@@ -1,0 +1,29 @@
+From 3f6a3641eebd9eeccf47c1b580dd8b09de29ad2f Mon Sep 17 00:00:00 2001
+From: Johannes Schindelin <johannes.schindelin@gmx.de>
+Date: Thu, 30 Jun 2022 15:05:22 +0200
+Subject: [PATCH 1/5] gz_open(): special-case `/dev/null`
+
+On Windows, it's `NUL`...
+
+Signed-off-by: Johannes Schindelin <johannes.schindelin@gmx.de>
+---
+ gzlib.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/gzlib.c b/gzlib.c
+index 4905516..1db6451 100644
+--- a/gzlib.c
++++ b/gzlib.c
+@@ -53,6 +53,9 @@ static gzFile gz_open(const void *path, int fd, const char *mode) {
+     if (path == NULL)
+         return NULL;
+ 
++    if (!strcmp("/dev/null", path))
++	    path = "NUL";
++
+     /* allocate gzFile structure to return */
+     state = (gz_state *)zng_alloc(sizeof(gz_state));
+     if (state == NULL)
+-- 
+2.37.0.rc2.windows.1
+

@@ -1,0 +1,55 @@
+# Maintainer: Johannes Schindelin <johannes.schindelin@gmx.de>
+
+_realname=zlib-ng
+pkgbase=mingw-w64-${_realname}
+pkgname=("${MINGW_PACKAGE_PREFIX}-${_realname}")
+pkgver=2.0.6
+pkgrel=1
+pkgdesc="Compression library implementing the deflate compression method found in gzip and PKZIP (mingw-w64)"
+arch=('any')
+mingw_arch=('mingw32' 'mingw64' 'ucrt64' 'clang64' 'clang32' 'clangarm64')
+license=(ZLIB)
+url="https://github.com/zlib-ng/zlib-ng"
+replaces=("${MINGW_PACKAGE_PREFIX}-${_realname%-ng}")
+conflicts=("${MINGW_PACKAGE_PREFIX}-${_realname%-ng}")
+provides=("${MINGW_PACKAGE_PREFIX}-${_realname%-ng}")
+makedepends=("${MINGW_PACKAGE_PREFIX}-gcc" "${MINGW_PACKAGE_PREFIX}-autotools")
+options=('staticlibs')
+source=("https://github.com/zlib-ng/zlib-ng/archive/refs/tags/${pkgver}.tar.gz"
+        "0001-gz_open-special-case-dev-null.patch"
+        "0002-make-test-ignore-the-existing-test-and-run-the-tests.patch"
+        "0003-Fix-test-binaries-dependency-on-libz.patch"
+        "0004-Use-DLL-name-that-is-backwards-compatible-with-mingw.patch"
+        "0005-Install-libz.dll.a-into-the-lib-directory.patch")
+sha256sums=('8258b75a72303b661a238047cb348203d88d9dddf85d480ed885f375916fcab6'
+            '57449e7e86affea424062619dd46d69c2e01c41c5c31b269ed5e634169e5e7ad'
+            '623cc7ee7d8e402bdbf2b371c11c03ee8704b7393bc9971a76511417ee3d421d'
+            '416792d5249039fd1e42a684fee9c457f8c08470da34d1e93f864564125ab620'
+            '3be1705ffa383f01efe527aaf1dfe7128807d00caae8f4a2f6f29924a3c29eba'
+            '1c1b555f33d6a4016315df54d2ed7145f3c2a21186fbcaa4b3b23c7e64bd130b')
+
+prepare() {
+  cd ${srcdir}/${_realname}-${pkgver}
+  patch -p1 -i "${srcdir}"/0001-gz_open-special-case-dev-null.patch
+  patch -p1 -i "${srcdir}"/0002-make-test-ignore-the-existing-test-and-run-the-tests.patch
+  patch -p1 -i "${srcdir}"/0003-Fix-test-binaries-dependency-on-libz.patch
+  patch -p1 -i "${srcdir}"/0004-Use-DLL-name-that-is-backwards-compatible-with-mingw.patch
+  patch -p1 -i "${srcdir}"/0005-Install-libz.dll.a-into-the-lib-directory.patch
+}
+
+build() {
+  cd ${srcdir}/${_realname}-${pkgver}
+  CHOST=${MINGW_CHOST} ./configure --prefix=${MINGW_PREFIX} --zlib-compat
+  make RC=${MINGW_PREFIX}/bin/windres STRIP= all
+}
+
+check() {
+  cd ${srcdir}/${_realname}-${pkgver}
+  make test
+}
+
+package() {
+  cd ${srcdir}/${_realname}-${pkgver}
+  make DESTDIR="${pkgdir}" install
+  install -Dm644 LICENSE.md "${pkgdir}${MINGW_PREFIX}/share/licenses/${_realname}/LICENSE.md"
+}

@@ -1,0 +1,35 @@
+From 86f35d4380e23b1fe970e5b2a6a61bdf4151e965 Mon Sep 17 00:00:00 2001
+From: Johannes Schindelin <johannes.schindelin@gmx.de>
+Date: Thu, 30 Jun 2022 15:26:07 +0200
+Subject: [PATCH 3/5] Fix test binaries' dependency on libz
+
+Signed-off-by: Johannes Schindelin <johannes.schindelin@gmx.de>
+---
+ test/Makefile.in | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/test/Makefile.in b/test/Makefile.in
+index 6a075d3..6b1664c 100644
+--- a/test/Makefile.in
++++ b/test/Makefile.in
+@@ -87,7 +87,7 @@ testCVE-2003-0107: CVE-2003-0107$(EXE) check_cross_dep
+ CVE-2003-0107.o: $(SRCDIR)/CVE-2003-0107.c
+ 	$(CC) $(CFLAGS) -I.. -I$(SRCTOP) -c -o $@ $(SRCDIR)/CVE-2003-0107.c
+ 
+-CVE-2003-0107$(EXE): CVE-2003-0107.o
++CVE-2003-0107$(EXE): CVE-2003-0107.o ../$(LIBNAME).a
+ 	$(CC) $(CFLAGS) -o $@ CVE-2003-0107.o $(TEST_LDFLAGS)
+ 
+ .PHONY: ghtests
+@@ -97,7 +97,7 @@ ghtests: testGH-361 testGH-364 testGH-751
+ testGH-361:
+ 	$(QEMU_RUN) ../minigzip$(EXE) -4 <$(SRCDIR)/GH-361/test.txt >/dev/null
+ 
+-switchlevels$(EXE): $(SRCDIR)/switchlevels.c
++switchlevels$(EXE): $(SRCDIR)/switchlevels.c ../$(LIBNAME).a
+ 	$(CC) $(CFLAGS) -I.. -I$(SRCTOP) -o $@ $< $(TEST_LDFLAGS)
+ 
+ .PHONY: testGH-364
+-- 
+2.37.0.rc2.windows.1
+

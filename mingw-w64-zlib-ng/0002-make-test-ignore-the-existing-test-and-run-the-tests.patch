@@ -1,0 +1,27 @@
+From 11496e86584e29fd8b7bd481ee538c2536d02908 Mon Sep 17 00:00:00 2001
+From: Johannes Schindelin <johannes.schindelin@gmx.de>
+Date: Thu, 30 Jun 2022 15:15:30 +0200
+Subject: [PATCH 2/5] make test: ignore the existing `test/` and run the tests
+ already
+
+Signed-off-by: Johannes Schindelin <johannes.schindelin@gmx.de>
+---
+ Makefile.in | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/Makefile.in b/Makefile.in
+index 8d4e42f..9135a04 100644
+--- a/Makefile.in
++++ b/Makefile.in
+@@ -160,6 +160,8 @@ $(ARCHDIR)/%.lo: $(SRCDIR)/$(ARCHDIR)/%.c
+ test: all
+ 	$(MAKE) -C test
+ 
++.PHONY: test
++
+ # This variable is set by configure.
+ WITH_FUZZERS=
+ 
+-- 
+2.37.0.rc2.windows.1
+
