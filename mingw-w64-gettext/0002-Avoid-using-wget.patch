@@ -1,0 +1,38 @@
+From 43b8c561b2ef6089625e6e1589e6d4e89644a420 Mon Sep 17 00:00:00 2001
+From: Johannes Schindelin <johannes.schindelin@gmx.de>
+Date: Tue, 11 Jan 2022 00:31:27 +0100
+Subject: [PATCH] Avoid using wget
+
+Git for Windows' SDK already contains `curl` and does not need `wget`
+in addition.
+
+Signed-off-by: Johannes Schindelin <johannes.schindelin@gmx.de>
+---
+ autogen.sh | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/autogen.sh b/autogen.sh
+index c3a7ef9e4..f862a109f 100755
+--- a/autogen.sh
++++ b/autogen.sh
+@@ -404,7 +404,7 @@ if test -n "$GNULIB_TOOL"; then
+ else
+   for file in config.guess config.sub; do
+     echo "$0: getting $file..."
+-    wget -q --timeout=5 -O build-aux/$file.tmp "https://git.savannah.gnu.org/gitweb/?p=gnulib.git;a=blob_plain;f=build-aux/${file};hb=HEAD" \
++    curl -q --connect-timeout 5 -o build-aux/$file.tmp "https://git.savannah.gnu.org/gitweb/?p=gnulib.git;a=blob_plain;f=build-aux/${file};hb=HEAD" \
+       && mv build-aux/$file.tmp build-aux/$file \
+       && chmod a+x build-aux/$file
+     retval=$?
+@@ -417,7 +417,7 @@ fi
+ if ! test -f gettext-tools/misc/archive.dir.tar; then
+   if ! test -f gettext-tools/misc/archive.dir.tar.xz; then
+     echo "$0: getting gettext-tools/misc/archive.dir.tar..."
+-    wget -q --timeout=5 -O gettext-tools/misc/archive.dir.tar.xz-t "https://alpha.gnu.org/gnu/gettext/archive.dir-latest.tar.xz" \
++    curl -q --connect-timeout 5 -o gettext-tools/misc/archive.dir.tar.xz-t "https://alpha.gnu.org/gnu/gettext/archive.dir-latest.tar.xz" \
+       && mv gettext-tools/misc/archive.dir.tar.xz-t gettext-tools/misc/archive.dir.tar.xz
+     retval=$?
+     rm -f gettext-tools/misc/archive.dir.tar.xz-t
+-- 
+2.34.1.windows.1
+
