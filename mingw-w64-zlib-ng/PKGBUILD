@@ -3,7 +3,7 @@
 _realname=zlib-ng
 pkgbase=mingw-w64-${_realname}
 pkgname=("${MINGW_PACKAGE_PREFIX}-${_realname}")
-pkgver=2.0.6
+pkgver=2.0.6a
 pkgrel=1
 pkgdesc="Compression library implementing the deflate compression method found in gzip and PKZIP (mingw-w64)"
 arch=('any')
@@ -13,14 +13,18 @@ url="https://github.com/zlib-ng/zlib-ng"
 replaces=("${MINGW_PACKAGE_PREFIX}-${_realname%-ng}")
 conflicts=("${MINGW_PACKAGE_PREFIX}-${_realname%-ng}")
 provides=("${MINGW_PACKAGE_PREFIX}-${_realname%-ng}")
-makedepends=("${MINGW_PACKAGE_PREFIX}-gcc" "${MINGW_PACKAGE_PREFIX}-autotools")
+makedepends=("${MINGW_PACKAGE_PREFIX}-gcc"
+             "${MINGW_PACKAGE_PREFIX}-cmake"
+             "${MINGW_PACKAGE_PREFIX}-ninja"
+             "${MINGW_PACKAGE_PREFIX}-autotools")
 options=('staticlibs')
-source=("https://github.com/zlib-ng/zlib-ng/archive/refs/tags/${pkgver}.tar.gz"
+source=("git+https://github.com/zlib-ng/zlib-ng/#branch=develop"
         "0001-gz_open-special-case-dev-null.patch"
         "0002-make-test-ignore-the-existing-test-and-run-the-tests.patch"
         "0003-Fix-test-binaries-dependency-on-libz.patch"
         "0004-Use-DLL-name-that-is-backwards-compatible-with-mingw.patch"
-        "0005-Install-libz.dll.a-into-the-lib-directory.patch")
+        "0005-Install-libz.dll.a-into-the-lib-directory.patch"
+        "0006-cmake-adjust-ZLIB_COMPAT-file-names.patch")
 sha256sums=('8258b75a72303b661a238047cb348203d88d9dddf85d480ed885f375916fcab6'
             '57449e7e86affea424062619dd46d69c2e01c41c5c31b269ed5e634169e5e7ad'
             '623cc7ee7d8e402bdbf2b371c11c03ee8704b7393bc9971a76511417ee3d421d'
@@ -29,27 +33,36 @@ sha256sums=('8258b75a72303b661a238047cb348203d88d9dddf85d480ed885f375916fcab6'
             '1c1b555f33d6a4016315df54d2ed7145f3c2a21186fbcaa4b3b23c7e64bd130b')
 
 prepare() {
-  cd ${srcdir}/${_realname}-${pkgver}
+  cd ${srcdir}/${_realname}
   patch -p1 -i "${srcdir}"/0001-gz_open-special-case-dev-null.patch
   patch -p1 -i "${srcdir}"/0002-make-test-ignore-the-existing-test-and-run-the-tests.patch
   patch -p1 -i "${srcdir}"/0003-Fix-test-binaries-dependency-on-libz.patch
   patch -p1 -i "${srcdir}"/0004-Use-DLL-name-that-is-backwards-compatible-with-mingw.patch
   patch -p1 -i "${srcdir}"/0005-Install-libz.dll.a-into-the-lib-directory.patch
+  patch -p1 -i "${srcdir}"/0006-cmake-adjust-ZLIB_COMPAT-file-names.patch
 }
 
 build() {
-  cd ${srcdir}/${_realname}-${pkgver}
-  CHOST=${MINGW_CHOST} ./configure --prefix=${MINGW_PREFIX} --zlib-compat
-  make RC=${MINGW_PREFIX}/bin/windres STRIP= all
+  mkdir -p ${srcdir}/build-${MSYSTEM}
+  cd ${srcdir}/build-${MSYSTEM}
+  "${MINGW_PREFIX}"/bin/cmake.exe \
+    -GNinja \
+    -DCMAKE_INSTALL_PREFIX="/${MINGW_PREFIX}" \
+    -DCMAKE_SHARED_LIBRARY_PREFIX= \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DZLIB_COMPAT=ON \
+    ../${_realname}
+
+  "${MINGW_PREFIX}"/bin/cmake.exe --build . -j $(nproc)
 }
 
 check() {
-  cd ${srcdir}/${_realname}-${pkgver}
-  make test
+  cd ${srcdir}/build-${MSYSTEM}
+  "${MINGW_PREFIX}"/bin/ctest.exe -j $(nproc)
 }
 
 package() {
-  cd ${srcdir}/${_realname}-${pkgver}
-  make DESTDIR="${pkgdir}" install
-  install -Dm644 LICENSE.md "${pkgdir}${MINGW_PREFIX}/share/licenses/${_realname}/LICENSE.md"
+  cd ${srcdir}/build-${MSYSTEM}
+  DESTDIR="${pkgdir}" "${MINGW_PREFIX}"/bin/cmake.exe --install .
+  install -Dm644 ${srcdir}/${_realname}/LICENSE.md "${pkgdir}${MINGW_PREFIX}/share/licenses/${_realname}/LICENSE.md"
 }

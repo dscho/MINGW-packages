@@ -1,0 +1,30 @@
+From f467b29aeea97b23664c78e879dcc10b2de7979e Mon Sep 17 00:00:00 2001
+From: Johannes Schindelin <johannes.schindelin@gmx.de>
+Date: Fri, 1 Jul 2022 17:30:28 +0200
+Subject: [PATCH 6/6] cmake: adjust ZLIB_COMPAT file names
+
+In the zlib-compat mode, we want to replace the existing files,
+therefore we must follow zlib's naming rules.
+
+Signed-off-by: Johannes Schindelin <johannes.schindelin@gmx.de>
+---
+ CMakeLists.txt | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index fae09c7..190e5ed 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1108,6 +1108,9 @@ if(NOT DEFINED BUILD_SHARED_LIBS OR BUILD_SHARED_LIBS)
+         # Creates zlib1.dll when building shared library version
+         if(ZLIB_COMPAT)
+             set_target_properties(zlib PROPERTIES SUFFIX "1.dll")
++	    set_target_properties(zlib PROPERTIES PREFIX "")
++	    set_target_properties(zlib PROPERTIES RUNTIME_OUTPUT_NAME "zlib")
++	    set_target_properties(zlib PROPERTIES OUTPUT_NAME "z")
+         else()
+             set_target_properties(zlib PROPERTIES SUFFIX "2.dll")
+         endif()
+-- 
+2.37.0.rc2.windows.1
+

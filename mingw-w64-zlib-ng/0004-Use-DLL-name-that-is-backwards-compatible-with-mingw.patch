@@ -1,7 +1,7 @@
-From 452b287ce987f4dc1011304dde69285f499851aa Mon Sep 17 00:00:00 2001
+From 2173304609f8c7d2d6bfc2f4d771f77d3c1f0fb5 Mon Sep 17 00:00:00 2001
 From: Johannes Schindelin <johannes.schindelin@gmx.de>
 Date: Thu, 30 Jun 2022 15:27:25 +0200
-Subject: [PATCH 4/5] Use DLL name that is backwards-compatible with
+Subject: [PATCH 4/6] Use DLL name that is backwards-compatible with
  mingw-w64-zlib
 
 Signed-off-by: Johannes Schindelin <johannes.schindelin@gmx.de>
@@ -10,10 +10,10 @@ Signed-off-by: Johannes Schindelin <johannes.schindelin@gmx.de>
  1 file changed, 5 insertions(+), 1 deletion(-)
 
 diff --git a/configure b/configure
-index afc07f9..e68083c 100755
+index ffee400..82a658e 100755
 --- a/configure
 +++ b/configure
-@@ -432,7 +432,11 @@ if test "$gcc" -eq 1 && ($cc $CFLAGS -c $test.c) >> configure.log 2>&1; then
+@@ -465,7 +465,11 @@ if test "$gcc" -eq 1 && ($cc $CFLAGS -c $test.c) >> configure.log 2>&1; then
          SFLAGS="${CFLAGS}"
          shared_ext='.dll'
          sharedlibdir='${bindir}'

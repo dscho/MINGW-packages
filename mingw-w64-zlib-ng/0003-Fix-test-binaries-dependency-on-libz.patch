@@ -1,7 +1,7 @@
-From 86f35d4380e23b1fe970e5b2a6a61bdf4151e965 Mon Sep 17 00:00:00 2001
+From 82e62b26d128526c9c0cc7e9a21a5d8b1de916b6 Mon Sep 17 00:00:00 2001
 From: Johannes Schindelin <johannes.schindelin@gmx.de>
 Date: Thu, 30 Jun 2022 15:26:07 +0200
-Subject: [PATCH 3/5] Fix test binaries' dependency on libz
+Subject: [PATCH 3/6] Fix test binaries' dependency on libz
 
 Signed-off-by: Johannes Schindelin <johannes.schindelin@gmx.de>
 ---
@@ -9,19 +9,10 @@ Signed-off-by: Johannes Schindelin <johannes.schindelin@gmx.de>
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/test/Makefile.in b/test/Makefile.in
-index 6a075d3..6b1664c 100644
+index 4cd1399..a71a3c9 100644
 --- a/test/Makefile.in
 +++ b/test/Makefile.in
-@@ -87,7 +87,7 @@ testCVE-2003-0107: CVE-2003-0107$(EXE) check_cross_dep
- CVE-2003-0107.o: $(SRCDIR)/CVE-2003-0107.c
- 	$(CC) $(CFLAGS) -I.. -I$(SRCTOP) -c -o $@ $(SRCDIR)/CVE-2003-0107.c
- 
--CVE-2003-0107$(EXE): CVE-2003-0107.o
-+CVE-2003-0107$(EXE): CVE-2003-0107.o ../$(LIBNAME).a
- 	$(CC) $(CFLAGS) -o $@ CVE-2003-0107.o $(TEST_LDFLAGS)
- 
- .PHONY: ghtests
-@@ -97,7 +97,7 @@ ghtests: testGH-361 testGH-364 testGH-751
+@@ -56,7 +56,7 @@ ghtests: testGH-361 testGH-364 testGH-751 testGH-1235
  testGH-361:
  	$(QEMU_RUN) ../minigzip$(EXE) -4 <$(SRCDIR)/GH-361/test.txt >/dev/null
  
@@ -30,6 +21,15 @@ index 6a075d3..6b1664c 100644
  	$(CC) $(CFLAGS) -I.. -I$(SRCTOP) -o $@ $< $(TEST_LDFLAGS)
  
  .PHONY: testGH-364
+@@ -67,7 +67,7 @@ testGH-364: switchlevels$(EXE)
+ testGH-751:
+ 	$(QEMU_RUN) ../minigzip$(EXE) <$(SRCDIR)/GH-751/test.txt | $(QEMU_RUN) ../minigzip$(EXE) -d >/dev/null
+ 
+-gh1235$(EXE): $(SRCDIR)/gh1235.c
++gh1235$(EXE): $(SRCDIR)/gh1235.c ../$(LIBNAME).a
+ 	$(CC) $(CFLAGS) -I.. -I$(SRCTOP) -o $@ $< $(TEST_LDFLAGS)
+ 
+ .PHONY: testGH-1235
 -- 
 2.37.0.rc2.windows.1
 
