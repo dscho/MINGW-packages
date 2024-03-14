@@ -40,11 +40,11 @@ test "$new_pkgver" = "$old_pkgver" &&
     
 new_pkgrel=$(("$new_pkgrel"+1))
 
-rm -f *.patch &&
+git rm -f *.patch &&
 mv upstream/$pkgname/*.patch ./ &&
-rm -f PKGBUILD &&
+git rm -f PKGBUILD &&
 mv upstream/$pkgname/PKGBUILD ./ &&
-rm -f README-patches.md &&
+git rm -f README-patches.md &&
 mv upstream/$pkgname/README-patches.md ./ || die "$0: failed to replace existing files with upstream files"
 
 sed -e "s/pkgrel=[.0-9]\+\(.*\)/pkgrel=$new_pkgrel\1/" \
@@ -53,5 +53,8 @@ sed -e "s/pkgrel=[.0-9]\+\(.*\)/pkgrel=$new_pkgrel\1/" \
     -e 's/-DLLVM_ENABLE_SPHINX=ON/-DLLVM_ENABLE_SPHINX=OFF/'\
     -e '/^check()/,/^}/d' \
 	-i PKGBUILD
+
+git add *.patch PKGBUILD README-patches.md ||
+die 'Could not `git add` files'
 
 cleanup
