@@ -106,7 +106,8 @@ prepare () {
 	CC = $CC
 	USE_ASCIIDOCTOR = YesPlease
 	COMPAT_CFLAGS := \$(filter-out -D_USE_32BIT_TIME_T,\$(COMPAT_CFLAGS)) $COMPAT_CFLAGS
-	BASIC_LDFLAGS := \$(filter-out -Wl,--large-address-aware,\$(BASIC_LDFLAGS))
+	LARGE_ADDRESS_OPT := -Wl,--large-address-aware
+	BASIC_LDFLAGS := \$(filter-out \$(LARGE_ADDRESS_OPT),\$(BASIC_LDFLAGS))
 	LDFLAGS = $LDFLAGS
 	EOF
 
