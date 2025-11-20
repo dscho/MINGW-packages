@@ -104,7 +104,7 @@ prepare () {
 
   cat >config.mak <<-EOF
 	USE_ASCIIDOCTOR = YesPlease
-	COMPAT_CFLAGS += $COMPAT_CFLAGS
+	COMPAT_CFLAGS := $(filter-out -D_USE_32BIT_TIME_T,\$(COMPAT_CFLAGS)) $COMPAT_CFLAGS
 	LDFLAGS = $LDFLAGS
 	EOF
 
