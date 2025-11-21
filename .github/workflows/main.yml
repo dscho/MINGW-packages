@@ -54,6 +54,17 @@ jobs:
           update: true
           location: '${{ steps.facts.outputs.drive }}\M'
 
+      - uses: msys2/setup-msys2@v2
+        # The public preview of GitHub-hosted Windows/ARM64 runners lacks
+        # a working MSYS2 installation, so we need to set it up ourselves.
+        with:
+          msystem: 'CLANGARM64'
+          # We cannot use `C:\` because `msys2/setup-msys2` erroneously
+          # believes that an MSYS2 exists at `C:\msys64`, but it doesn't,
+          # which is the entire reason why we need to set it up in this
+          # here step... However, by using `C:\.\` we can fool that
+          # overzealous check.
+          location: C:\.\
       - uses: mxschmitt/action-tmate/detached@v3
 
       - name: Add staging repo
