@@ -59,8 +59,10 @@ install-perl-svn-module:
 	find '$(DESTDIR_SQ)$(perllibdir_SQ)' -type d -empty -delete
 
 uninstall-perl-modules:
+	rm $(patsubst perl/%.pm,'$(DESTDIR_SQ)$(perllibdir_SQ)/%.pm',$(LIB_CPAN))
 	rm '$(DESTDIR_SQ)$(perllibdir_SQ)/Git.pm'
 	rm -r '$(DESTDIR_SQ)$(perllibdir_SQ)/Git'
+	find '$(DESTDIR_SQ)$(perllibdir_SQ)' -type d -empty -delete
 endif
 
 install-pdbs:
