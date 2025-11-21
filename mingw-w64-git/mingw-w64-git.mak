@@ -58,7 +58,7 @@ install-perl-svn-module:
 	find '$(DESTDIR_SQ)$(perllibdir_SQ)' -type f ! -path "*/Git/SVN*" -delete
 	find '$(DESTDIR_SQ)$(perllibdir_SQ)' -type d -empty -delete
 
-uninstall-perl-svn-modules:
+uninstall-perl-modules:
 	rm '$(DESTDIR_SQ)$(perllibdir_SQ)/Git.pm'
 	rm -r '$(DESTDIR_SQ)$(perllibdir_SQ)/Git'
 endif
