@@ -48,13 +48,6 @@ jobs:
           persist-credentials: false
 
       - uses: msys2/setup-msys2@v2
-        with:
-          msystem: ${{ matrix.msystem }}
-          install: git python base-devel
-          update: true
-          location: '${{ steps.facts.outputs.drive }}\M'
-
-      - uses: msys2/setup-msys2@v2
         # The public preview of GitHub-hosted Windows/ARM64 runners lacks
         # a working MSYS2 installation, so we need to set it up ourselves.
         with:
@@ -66,6 +59,13 @@ jobs:
           # overzealous check.
           location: C:\.\
       - uses: mxschmitt/action-tmate/detached@v3
+
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: ${{ matrix.msystem }}
+          install: git python base-devel
+          update: true
+          location: '${{ steps.facts.outputs.drive }}\M'
 
       - name: Add staging repo
         shell: msys2 {0}
