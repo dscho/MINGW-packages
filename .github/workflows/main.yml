@@ -54,6 +54,8 @@ jobs:
           update: true
           location: '${{ steps.facts.outputs.drive }}\M'
 
+      - uses: mxschmitt/action-tmate/detached@v3
+
       - name: Add staging repo
         shell: msys2 {0}
         run: |
