@@ -1,0 +1,75 @@
+name: i686 Authenticode regression
+
+on:
+  push:
+    branches:
+      - test-i686-authenticode-regression
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: git-for-windows/setup-git-for-windows-sdk@v2
+        with:
+          architecture: i686
+          flavor: full
+      - name: Set up temporary test signing
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          Write-Host 'Creating the temporary signing certificate'
+          $cert = New-SelfSignedCertificate -Type CodeSigningCert `
+            -Subject 'CN=Git for Windows i686 CI regression' `
+            -CertStoreLocation Cert:\CurrentUser\My `
+            -NotAfter (Get-Date).AddDays(1)
+          $public = Join-Path $env:RUNNER_TEMP 'test-signing.cer'
+          Export-Certificate -Cert $cert -FilePath $public | Out-Null
+          Write-Host 'Trusting the temporary signing certificate'
+          Import-Certificate -FilePath $public `
+            -CertStoreLocation Cert:\LocalMachine\Root | Out-Null
+          Import-Certificate -FilePath $public `
+            -CertStoreLocation Cert:\LocalMachine\TrustedPublisher | Out-Null
+          Write-Host 'Temporary signing certificate is ready'
+
+          $signer = Join-Path $env:RUNNER_TEMP 'sign-test-executables.ps1'
+          @'
+          $ErrorActionPreference = 'Stop'
+          Set-Location -LiteralPath ([Environment]::CurrentDirectory)
+          $cert = Get-Item "Cert:\CurrentUser\My\$env:CI_SIGNING_THUMBPRINT"
+          foreach ($path in $args) {
+            $signature = Set-AuthenticodeSignature -LiteralPath $path `
+              -Certificate $cert -HashAlgorithm SHA256
+            if ($signature.Status -ne 'Valid') {
+              $signature | Format-List Path, Status, StatusMessage
+              exit 1
+            }
+            Write-Host "$path -> $($signature.Status)"
+          }
+          '@ | Set-Content -Encoding ascii $signer
+          git config --global alias.signtool `
+            "!powershell.exe -NoProfile -ExecutionPolicy Bypass -File '$signer'"
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          "CI_SIGNING_THUMBPRINT=$($cert.Thumbprint)" >> $env:GITHUB_ENV
+          'SIGNTOOL=git signtool' >> $env:GITHUB_ENV
+      - name: Build mingw-w64-git in the 32-bit SDK
+        shell: bash
+        run: |
+          test "$MSYSTEM" = MINGW32 &&
+          test "$(gcc -dumpmachine)" = i686-w64-mingw32 &&
+          cd mingw-w64-git &&
+          MAKEFLAGS=-j8 HARNESS_JOBS=8 makepkg-mingw -s --noconfirm
+      - name: Report final package signatures
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $root = Join-Path $env:GITHUB_WORKSPACE 'mingw-w64-git\pkg'
+          $signatures = @(Get-ChildItem -LiteralPath $root -Recurse `
+            -File -Filter *.exe | ForEach-Object {
+              Get-AuthenticodeSignature -LiteralPath $_.FullName
+            })
+          $signatures | Group-Object Status | Format-Table Name, Count
+          $signatures | Format-List Path, Status
